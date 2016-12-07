@@ -349,8 +349,18 @@ class Laralastica implements Wrapper
      */
     protected function connection()
     {
-        return $this->config['hosts'];
+        $config = $this->config['hosts'];
+        
+        foreach($config['connections'] as &$conn) {
+            // encode BasicAuth
+            if(isset($conn['basic_auth'])) {
+                $conn['headers'] = (!isset($conn['headers']) ? [] : (array)$conn['headers']);
+                $conn['headers']['Authorization'] = 'Basic '.base64_encode($conn['basic_auth']['username'].':'.$conn['basic_auth']['password']);
+                unset($conn['basic_auth']);
+            }
+        }
 
+        return $config;
     }
 
     /**
