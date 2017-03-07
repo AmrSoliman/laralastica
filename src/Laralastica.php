@@ -183,6 +183,7 @@ class Laralastica implements Wrapper
 
         return $this;
     }
+
     /**
      * update a document from the provided type.
      *
@@ -191,14 +192,36 @@ class Laralastica implements Wrapper
      * @param array $data
      * @return $this
      */
-    public function updateDocument($type, $id, array $data=[])
+    public function updateDocument($type, $id, array $data = [])
     {
         $type = $this->getType($type);
 
         $document = new Document($id, $data);
 
-          $type->updateDocument($document);
+        $type->updateDocument($document);
 
+        $this->refreshIndex();
+
+        return $this;
+    }
+
+    /**
+     * update bulk  documents from the provided type.
+     *
+     * @param string $type
+     * @param array $data
+     * @return $this
+     */
+    public function updateDocuments($type, array $data = [])
+    {
+        $type = $this->getType($type);
+        $documents = [];
+
+        foreach ($data as $id => $values) {
+            $documents[] = new Document($id, $values);
+        }
+
+        $type->updateDocuments($documents);
         $this->refreshIndex();
 
         return $this;
@@ -274,6 +297,7 @@ class Laralastica implements Wrapper
             $groupedResults = $this->groupResultsByType($results);
             $modelResults = $this->getModelsFromGroupedResults($groupedResults);
             $collection = $this->newCollection($modelResults);
+
             return $collection;
             // return $collection->sortByDesc(function ($model) {
             //     return $model->score;
